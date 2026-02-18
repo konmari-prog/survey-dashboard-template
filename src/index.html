@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: <?= primaryColor ?>;
+      --gradient-from: <?= gradient[0] ?>;
+      --gradient-to: <?= gradient[1] ?>;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans JP', sans-serif; background: #F5F9F9; color: #2D3436; line-height: 1.8; min-height: 100vh; }
+    .header { background: linear-gradient(135deg, var(--gradient-from), var(--gradient-to)); padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden; }
+    .header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+    .header-label { display: inline-block; background: rgba(255,255,255,0.22); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: 0.1em; padding: 4px 16px; border-radius: 20px; margin-bottom: 16px; }
+    .header h1 { color: #fff; font-size: 22px; font-weight: 700; line-height: 1.5; position: relative; z-index: 1; }
+    .header-sub { color: rgba(255,255,255,0.88); font-size: 13px; margin-top: 8px; position: relative; z-index: 1; }
+    .content { max-width: 640px; margin: 0 auto; padding: 24px 16px 40px; }
+    .session-section { margin-bottom: 12px; }
+    .session-toggle { width: 100%; background: #fff; border: none; border-radius: 12px; padding: 18px 24px; display: flex; align-items: center; gap: 14px; cursor: pointer; box-shadow: 0 1px 8px rgba(0,0,0,0.04); transition: box-shadow 0.2s; text-align: left; }
+    .session-toggle:hover { box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+    .session-toggle.active { border-radius: 12px 12px 0 0; }
+    .session-toggle-icon { width: 36px; height: 36px; background: color-mix(in srgb, var(--primary) 10%, white); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .session-toggle-icon .material-icons { color: var(--primary); font-size: 20px; }
+    .session-toggle-text { flex: 1; }
+    .session-toggle-name { font-size: 15px; font-weight: 700; color: #2D3436; font-family: 'Noto Sans JP', sans-serif; }
+    .session-toggle-count { font-size: 12px; color: #999; margin-top: 2px; font-family: 'Noto Sans JP', sans-serif; }
+    .session-toggle-arrow { color: #CCBFB5; transition: transform 0.3s; flex-shrink: 0; }
+    .session-toggle.active .session-toggle-arrow { transform: rotate(180deg); }
+    .session-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: #fff; border-radius: 0 0 12px 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    .session-body.open { max-height: 10000px; }
+    .session-body-inner { padding: 8px 0 16px; }
+    .qa-card { border-top: 1px solid #F0EDED; }
+    .qa-card:first-child { border-top: none; }
+    .qa-question { padding: 18px 24px 14px; display: flex; gap: 12px; }
+    .qa-badge { width: 28px; height: 28px; background: var(--primary); color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .qa-question-text { font-size: 15px; font-weight: 500; color: #2D3436; line-height: 1.7; }
+    .qa-divider { height: 1px; background: #F0EDED; margin: 0 24px; }
+    .qa-answer { padding: 14px 24px 18px; display: flex; gap: 12px; background: #F9FDFD; }
+    .qa-answer-badge { width: 28px; height: 28px; background: #AADDDD; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .qa-answer-text { font-size: 14px; color: #3D4A4A; line-height: 1.8; }
+    .qa-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; color: #AABBB8; }
+    .qa-meta .material-icons { font-size: 14px; }
+    .footer { text-align: center; padding: 24px 16px 40px; max-width: 640px; margin: 0 auto; }
+    .footer-divider { height: 1px; background: #E0EDED; margin-bottom: 24px; }
+    .footer-logo { font-size: 14px; font-weight: 700; color: var(--primary); letter-spacing: 0.05em; }
+    .footer-text { font-size: 12px; color: #AABBB8; margin-top: 8px; }
+    .loading { text-align: center; padding: 60px 16px; color: #AABBB8; font-size: 14px; }
+    .loading .material-icons { font-size: 32px; color: var(--primary); animation: spin 1.2s linear infinite; display: block; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; color: #999; padding: 40px 0; }
+    @media (min-width: 768px) { .header { padding: 56px 32px 44px; } .header h1 { font-size: 26px; } .content { padding: 32px 16px 60px; } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-label"><?= projectName ?></div>
+    <h1>Q&A 質問回答集</h1>
+    <p class="header-sub">皆さまからいただいた質問にお答えします</p>
+  </div>
+
+  <div class="content">
+    <div id="qa-container">
+      <div class="loading">
+        <span class="material-icons">refresh</span>
+        読み込み中...
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <div class="footer-logo"><?= projectName ?></div>
+    <p class="footer-text">Q&A 質問回答集</p>
+  </div>
+
+  <script>
+    google.script.run
+      .withSuccessHandler(renderQA)
+      .withFailureHandler(showError)
+      .getQAData();
+
+    function renderQA(groups) {
+      var container = document.getElementById('qa-container');
+      if (!groups || groups.length === 0) {
+        container.innerHTML = '<p class="empty">まだ質問がありません。</p>';
+        return;
+      }
+
+      var html = '';
+      for (var g = 0; g < groups.length; g++) {
+        var group = groups[g];
+        var isFirst = (g === 0);
+        var sectionId = 'section-' + g;
+
+        html += '<div class="session-section">';
+        html += '<button class="session-toggle' + (isFirst ? ' active' : '') + '" onclick="toggleSection(\'' + sectionId + '\', this)">';
+        html += '<div class="session-toggle-icon"><span class="material-icons">play_circle</span></div>';
+        html += '<div class="session-toggle-text">';
+        html += '<div class="session-toggle-name">' + escapeHtml(group.session) + '</div>';
+        html += '<div class="session-toggle-count">' + group.items.length + '件の質問</div>';
+        html += '</div>';
+        html += '<span class="material-icons session-toggle-arrow">expand_more</span>';
+        html += '</button>';
+
+        html += '<div class="session-body' + (isFirst ? ' open' : '') + '" id="' + sectionId + '">';
+        html += '<div class="session-body-inner">';
+
+        for (var i = 0; i < group.items.length; i++) {
+          var qa = group.items[i];
+          var qNo = qa.no || (i + 1);
+          html += '<div class="qa-card">';
+          html += '<div class="qa-question"><div class="qa-badge">Q' + qNo + '</div><div class="qa-question-text">' + escapeHtml(qa.question) + '</div></div>';
+          html += '<div class="qa-divider"></div>';
+          if (qa.answer) {
+            html += '<div class="qa-answer"><div class="qa-answer-badge">A</div><div>';
+            html += '<div class="qa-answer-text">' + escapeHtml(qa.answer) + '</div>';
+            if (qa.date) html += '<div class="qa-meta"><span class="material-icons">schedule</span>' + escapeHtml(qa.date) + ' 回答</div>';
+            html += '</div></div>';
+          }
+          html += '</div>';
+        }
+
+        html += '</div></div></div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function toggleSection(sectionId, btn) {
+      var body = document.getElementById(sectionId);
+      if (body.classList.contains('open')) { body.classList.remove('open'); btn.classList.remove('active'); }
+      else { body.classList.add('open'); btn.classList.add('active'); }
+    }
+
+    function showError(err) {
+      document.getElementById('qa-container').innerHTML =
+        '<p style="text-align:center;color:#E87A8E;padding:40px 0;">読み込みに失敗しました。<br>ページを再読み込みしてください。</p>';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+    }
+  </script>
+
+</body>
+</html>

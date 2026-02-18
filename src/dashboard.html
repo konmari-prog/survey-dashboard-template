@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アンケートダッシュボード</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+:root{--primary:#4A90D9;--primary-light:#4A90D915;--gradient-from:#4A90D9;--gradient-to:#357ABD}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP',sans-serif;background:#FAFBFC;color:#2D3436}
+.header{background:linear-gradient(135deg,var(--gradient-from),var(--gradient-to));padding:24px 32px;color:#fff}
+.header h1{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header p{font-size:13px;opacity:.8;margin-top:4px}
+.filters{background:#fff;padding:12px 32px;border-bottom:1px solid #eee;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.filters label{font-size:13px;font-weight:500;color:#888}
+.filters select{padding:6px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;background:#fff}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+.kpi{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center}
+.kpi .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:22px}
+.kpi .value{font-size:28px;font-weight:700;color:#2D3436}
+.kpi .label{font-size:12px;color:#888;margin-top:2px}
+.kpi.alert{border:2px solid #E74C3C}
+.kpi.alert .value{color:#E74C3C}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.chart-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.chart-card h3{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;color:#555}
+.chart-card canvas{max-height:260px}
+.section-title{font-size:16px;font-weight:700;margin:32px 0 16px;padding-left:12px;border-left:4px solid var(--primary);color:#2D3436}
+.cross-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px}
+.cross-table th{background:#F5F5F5;padding:10px 12px;text-align:left;font-weight:500;border-bottom:2px solid #eee}
+.cross-table td{padding:10px 12px;border-bottom:1px solid #f0f0f0}
+.cross-table tr:hover{background:#FAFAFA}
+.highlight{color:var(--primary);font-weight:700}
+.freetext-section{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:20px}
+.freetext-section h3{font-size:14px;font-weight:700;margin-bottom:12px;color:#555;display:flex;align-items:center;gap:6px}
+.freetext-section .count{font-size:12px;color:#999;font-weight:400}
+.freetext-list{list-style:none;max-height:300px;overflow-y:auto}
+.freetext-list li{padding:8px 12px;border-bottom:1px solid #f5f5f5;font-size:13px;line-height:1.6}
+.freetext-list li:last-child{border-bottom:none}
+.freetext-list .num{color:var(--primary);font-weight:700;margin-right:8px;font-size:12px}
+.freetext-list .member-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-right:6px;font-weight:500;vertical-align:middle;background:var(--primary-light);color:var(--primary);border:1px solid var(--primary)}
+.freetext-list li.negative{background:#FFF5F5;border-left:3px solid #E74C3C}
+.freetext-list li.negative .num{color:#E74C3C}
+.kpi.context{background:linear-gradient(135deg,#F8F9FA,#F0F1F3);border:1px solid #E0E0E0}
+.kpi.context .value{font-size:18px;color:#555}
+.loading{text-align:center;padding:80px;color:#999;font-size:15px}
+.tab-nav{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid #eee}
+.tab-nav button{padding:10px 24px;border:none;background:none;font-size:14px;font-weight:500;cursor:pointer;color:#999;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:all .2s}
+.tab-nav button.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.alert-banner{background:linear-gradient(135deg,#FFF5F5,#FFF0F0);border:1px solid #FADBD8;border-radius:12px;padding:20px;margin-bottom:24px}
+.alert-banner h3{font-size:15px;font-weight:700;color:#E74C3C;display:flex;align-items:center;gap:6px;margin-bottom:16px}
+.alert-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.alert-item{background:#fff;border-radius:8px;padding:16px;border:1px solid #FADBD8}
+.alert-item h4{font-size:13px;font-weight:700;color:#C0392B;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.alert-item .stat{font-size:24px;font-weight:700;color:#E74C3C}
+.alert-item .detail{font-size:12px;color:#888;margin-top:4px}
+.alert-item ul{list-style:none;margin-top:8px}
+.alert-item ul li{font-size:12px;color:#555;padding:4px 0;border-bottom:1px solid #f5f5f5;line-height:1.5}
+.alert-item ul li:last-child{border-bottom:none}
+.voice-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.voice-filter button{padding:6px 14px;border:1px solid #ddd;background:#fff;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s}
+.voice-filter button.active{background:#E74C3C;color:#fff;border-color:#E74C3C}
+.voice-filter button.active-all{background:var(--primary);color:#fff;border-color:var(--primary)}
+.low-score{color:#E74C3C;font-weight:700}
+@media(max-width:768px){
+  .chart-grid,.alert-grid{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .container{padding:16px}
+  .filters{padding:12px 16px}
+  .header{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span class="material-icons">analytics</span> <span id="headerTitle">アンケートダッシュボード</span></h1>
+  <p id="headerSub">アンケート集計</p>
+</div>
+
+<div class="filters">
+  <div>
+    <label>セッション</label>
+    <select id="filterSession"><option value="">すべて</option></select>
+  </div>
+  <div id="filterMemberWrap" style="display:none">
+    <label>会員区分</label>
+    <select id="filterMember"><option value="">すべて</option></select>
+  </div>
+  <div style="margin-left:auto;font-size:12px;color:#aaa" id="metaInfo"></div>
+</div>
+
+<div class="container">
+  <div class="tab-nav">
+    <button class="active" data-tab="summary">サマリー</button>
+    <button data-tab="trend">経過比較</button>
+    <button data-tab="cross" id="tabCrossBtn" style="display:none">クロス集計</button>
+    <button data-tab="voice">受講者の声</button>
+  </div>
+
+  <!-- サマリータブ -->
+  <div id="tab-summary" class="tab-content active">
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="alert-banner" id="alertBanner" style="display:none">
+      <h3><span class="material-icons" style="font-size:20px">warning</span> 要注意シグナル</h3>
+      <div class="alert-grid" id="alertGrid"></div>
+    </div>
+    <div class="chart-grid" id="summaryCharts"></div>
+  </div>
+
+  <!-- 経過比較タブ -->
+  <div id="tab-trend" class="tab-content">
+    <div class="chart-grid" id="trendCharts"></div>
+    <div class="section-title">セッションごと詳細</div>
+    <div style="overflow-x:auto"><table class="cross-table" id="trendDetailTable"></table></div>
+  </div>
+
+  <!-- クロス集計タブ -->
+  <div id="tab-cross" class="tab-content" id="crossContent"></div>
+
+  <!-- 受講者の声タブ -->
+  <div id="tab-voice" class="tab-content"></div>
+
+  <div class="loading" id="loadingMsg">
+    <span class="material-icons" style="font-size:40px;color:#ddd;display:block;margin-bottom:12px">hourglass_top</span>
+    データを読み込んでいます...
+  </div>
+</div>
+
+<script>
+const NEGATIVE_KEYWORDS = [
+  'できなかった','わからない','わからなかった','難しい','難しかった',
+  'ついていけ','理解できな','不安','不満','残念','改善',
+  'もう少し','足りな','遅い','早すぎ','速すぎ',
+  '聞き取れ','見えにく','見づらい','使いにく','使えな',
+  '期待はずれ','物足りな','つまらな','退屈','長すぎ','短すぎ',
+  '時間が','ペースが','レベルが','初心者には',
+  'まだ','できていない','やれていない','手が付けられ',
+  '忙し','時間がな','余裕がな'
+];
+
+let allRows = [];
+let COL = {}; // 動的に設定
+let FREE_TEXT_COLS = []; // 自由記述列
+let charts = {};
+let voiceFilter = 'all';
+let HAS_SAT = false, HAS_UND = false, HAS_OUTPUT = false, HAS_MEMBER = false;
+
+google.script.run.withSuccessHandler(onDataLoaded).getDashboardData();
+
+function onDataLoaded(data) {
+  document.getElementById('loadingMsg').style.display = 'none';
+  allRows = data.rows || [];
+  COL = data.columnMap || {};
+  FREE_TEXT_COLS = data.freeTextColumns || [];
+
+  // テーマカラーを適用
+  const pc = data.primaryColor || '#4A90D9';
+  const gr = data.gradient || [pc, pc];
+  document.documentElement.style.setProperty('--primary', pc);
+  document.documentElement.style.setProperty('--primary-light', pc + '15');
+  document.documentElement.style.setProperty('--gradient-from', gr[0]);
+  document.documentElement.style.setProperty('--gradient-to', gr[1]);
+
+  // プロジェクト名
+  const pn = data.projectName || 'アンケートダッシュボード';
+  document.getElementById('headerTitle').textContent = pn + ' ダッシュボード';
+  document.getElementById('headerSub').textContent = pn + ' アンケート集計';
+
+  // 利用可能な列を判定
+  HAS_SAT = COL.satisfaction !== undefined;
+  HAS_UND = COL.understanding !== undefined;
+  HAS_OUTPUT = COL.output !== undefined;
+  HAS_MEMBER = COL.memberType !== undefined;
+
+  // クロス集計タブは会員区分がある場合のみ表示
+  if (HAS_MEMBER) {
+    document.getElementById('tabCrossBtn').style.display = '';
+    document.getElementById('filterMemberWrap').style.display = '';
+  }
+
+  populateFilters();
+  setupTabs();
+  buildChartContainers();
+  render();
+}
+
+function populateFilters() {
+  const sessionCol = COL.session;
+  if (sessionCol !== undefined) {
+    const sessions = [...new Set(allRows.map(r => r[sessionCol]).filter(Boolean))].sort();
+    const sel = document.getElementById('filterSession');
+    sessions.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+    sel.onchange = render;
+  }
+  if (HAS_MEMBER) {
+    const members = [...new Set(allRows.map(r => r[COL.memberType]).filter(Boolean))].sort();
+    const sel = document.getElementById('filterMember');
+    members.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o); });
+    sel.onchange = render;
+  }
+}
+
+function setupTabs() {
+  document.querySelectorAll('.tab-nav button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-nav button').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+      this.classList.add('active');
+    });
+  });
+}
+
+// チャートコンテナを動的に構築
+function buildChartContainers() {
+  const sg = document.getElementById('summaryCharts');
+  let html = '';
+  if (HAS_SAT) html += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:var(--primary)">sentiment_satisfied</span> 満足度分布</h3><canvas id="chartSatisfaction"></canvas></div>';
+  if (HAS_MEMBER) html += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:#2C82C9">group</span> 会員区分</h3><canvas id="chartMember"></canvas></div>';
+  if (HAS_UND) html += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:#27AE60">smart_toy</span> 理解度</h3><canvas id="chartUnderstanding"></canvas></div>';
+  if (HAS_OUTPUT) html += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:#F39C12">edit_note</span> アウトプット状況</h3><canvas id="chartOutput"></canvas></div>';
+  sg.innerHTML = html;
+
+  // 経過比較チャートコンテナ
+  const tg = document.getElementById('trendCharts');
+  let th = '';
+  if (HAS_SAT) th += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:var(--primary)">show_chart</span> 満足度平均の推移</h3><canvas id="chartTrendSat"></canvas></div>';
+  if (HAS_UND) th += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:#2C82C9">show_chart</span> 理解度の推移</h3><canvas id="chartTrendUnd"></canvas></div>';
+  th += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:#27AE60">bar_chart</span> 提出数の推移</h3><canvas id="chartTrendCount"></canvas></div>';
+  if (HAS_MEMBER) th += '<div class="chart-card"><h3><span class="material-icons" style="font-size:18px;color:#F39C12">bar_chart</span> 区分別 提出数の推移</h3><canvas id="chartTrendMember"></canvas></div>';
+  tg.innerHTML = th;
+}
+
+function getFiltered() {
+  const sf = document.getElementById('filterSession').value;
+  const mf = HAS_MEMBER ? document.getElementById('filterMember').value : '';
+  return allRows.filter(r =>
+    (!sf || (COL.session !== undefined && r[COL.session] === sf)) &&
+    (!mf || r[COL.memberType] === mf)
+  );
+}
+
+function countBy(rows, col) {
+  if (col === undefined) return [];
+  const m = {};
+  rows.forEach(r => { const v = String(r[col] || '').trim(); if (v) m[v] = (m[v]||0)+1; });
+  return Object.entries(m).sort((a,b) => b[1]-a[1]);
+}
+
+function isNegative(text) {
+  if (!text) return false;
+  const t = String(text).toLowerCase();
+  return NEGATIVE_KEYWORDS.some(kw => t.includes(kw));
+}
+
+function render() {
+  const rows = getFiltered();
+  const total = rows.length;
+  document.getElementById('metaInfo').textContent = '回答数: ' + total + '件';
+
+  // --- KPI ---
+  const kpis = [];
+  const mf = HAS_MEMBER ? document.getElementById('filterMember').value : '';
+  kpis.push(contextCard('filter_alt', mf || '全体', '表示中の対象'));
+  kpis.push(kpiCard('people', 'var(--primary)', total, '回答数', false));
+
+  let lowSatCount = 0;
+  if (HAS_SAT) {
+    const satValues = rows.map(r => Number(r[COL.satisfaction])).filter(v => !isNaN(v) && v > 0);
+    const satAvg = satValues.length ? (satValues.reduce((a,b)=>a+b,0)/satValues.length).toFixed(1) : '-';
+    lowSatCount = satValues.filter(v => v <= 3).length;
+    kpis.push(kpiCard('star', '#F39C12', satAvg, '満足度平均', false));
+    kpis.push(kpiCard('warning', '#E74C3C', lowSatCount + '件', '満足度3以下', lowSatCount > 0));
+  }
+  if (HAS_OUTPUT) {
+    const outputNotDone = rows.filter(r => { const v = String(r[COL.output]||'').trim(); return v === 'いいえ' || v === 'できなかった'; }).length;
+    const outputRate = total > 0 ? Math.round((total - outputNotDone)/total*100) : 0;
+    kpis.push(kpiCard('edit_note', '#27AE60', outputRate + '%', 'アウトプット率', false));
+  }
+  document.getElementById('kpiRow').innerHTML = kpis.join('');
+
+  // --- 要注意シグナル ---
+  renderAlertBanner(rows, total, lowSatCount);
+
+  // --- チャート ---
+  if (HAS_SAT) renderSatisfactionChart(rows);
+  if (HAS_MEMBER) renderChart('chartMember', 'doughnut', countBy(rows, COL.memberType), ['var(--primary)','#2C82C9','#27AE60','#F39C12','#9B59B6']);
+  if (HAS_UND) renderChart('chartUnderstanding', 'bar', countBy(rows, COL.understanding), '#2C82C9');
+  if (HAS_OUTPUT) renderChart('chartOutput', 'bar', countBy(rows, COL.output), '#27AE60');
+
+  renderTrend(rows);
+  if (HAS_MEMBER) renderCrossTab(rows);
+  renderVoice(rows, total);
+}
+
+function contextCard(icon, value, label) {
+  return '<div class="kpi context"><div class="icon" style="background:#88888815;color:#888"><span class="material-icons">'+icon+'</span></div><div class="value">'+escHtml(value)+'</div><div class="label">'+label+'</div></div>';
+}
+function kpiCard(icon, color, value, label, isAlert) {
+  return '<div class="kpi'+(isAlert?' alert':'')+'"><div class="icon" style="background:'+color+'15;color:'+color+'"><span class="material-icons">'+icon+'</span></div><div class="value">'+value+'</div><div class="label">'+label+'</div></div>';
+}
+
+function renderAlertBanner(rows, total, lowSatCount) {
+  const banner = document.getElementById('alertBanner');
+  const grid = document.getElementById('alertGrid');
+  let html = '';
+
+  // 低満足度
+  if (HAS_SAT && lowSatCount > 0) {
+    const reasons = [];
+    if (COL.understanding !== undefined) {
+      rows.forEach(r => {
+        const sat = Number(r[COL.satisfaction]);
+        const reason = String(r[COL.understanding]||'').trim();
+        // understanding列を理由として流用（理解度の理由が入っていることが多い）
+        if (!isNaN(sat) && sat <= 3 && reason) reasons.push(reason);
+      });
+    }
+    html += '<div class="alert-item"><h4><span class="material-icons" style="font-size:16px">sentiment_dissatisfied</span> 満足度が低い回答</h4>';
+    html += '<div class="stat">' + lowSatCount + '件<span style="font-size:13px;color:#888;font-weight:400"> / ' + total + '件中</span></div>';
+    if (reasons.length > 0) {
+      html += '<ul>';
+      reasons.slice(0,5).forEach(r => html += '<li>' + escHtml(r) + '</li>');
+      html += '</ul>';
+    }
+    html += '</div>';
+  }
+
+  // ネガティブな感想
+  if (COL.impression !== undefined) {
+    const negImps = [];
+    rows.forEach(r => {
+      const v = String(r[COL.impression]||'').trim();
+      if (v && isNegative(v)) negImps.push(v);
+    });
+    if (negImps.length > 0) {
+      html += '<div class="alert-item"><h4><span class="material-icons" style="font-size:16px">feedback</span> 気になる感想</h4>';
+      html += '<div class="stat">' + negImps.length + '件</div><ul>';
+      negImps.slice(0,5).forEach(r => html += '<li>' + escHtml(r) + '</li>');
+      html += '</ul></div>';
+    }
+  }
+
+  banner.style.display = html ? 'block' : 'none';
+  grid.innerHTML = html;
+}
+
+function renderSatisfactionChart(rows) {
+  const data = countBy(rows, COL.satisfaction).sort((a,b) => Number(a[0]) - Number(b[0]));
+  if (charts['chartSatisfaction']) charts['chartSatisfaction'].destroy();
+  const ctx = document.getElementById('chartSatisfaction');
+  if (!ctx) return;
+  const labels = data.map(d => d[0]);
+  const values = data.map(d => d[1]);
+  const colors = labels.map(l => { const n = Number(l); return n <= 2 ? '#E74C3C' : n <= 3 ? '#E67E22' : getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(); });
+  charts['chartSatisfaction'] = new Chart(ctx.getContext('2d'), {
+    type:'bar', data:{labels, datasets:[{data:values, backgroundColor:colors, borderWidth:0, borderRadius:6}]},
+    options:{responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}}
+  });
+}
+
+function renderChart(id, type, data, color) {
+  if (charts[id]) charts[id].destroy();
+  const el = document.getElementById(id);
+  if (!el) return;
+  const labels = data.map(d => d[0]);
+  const values = data.map(d => d[1]);
+  const pc = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+  const resolvedColor = typeof color === 'string' ? (color.startsWith('var') ? pc : color) : color.map(c => c.startsWith('var') ? pc : c);
+  const colors = Array.isArray(resolvedColor) ? resolvedColor : labels.map((_,i) => { const a = 1 - i*0.12; return resolvedColor + Math.round(a*255).toString(16).padStart(2,'0'); });
+  charts[id] = new Chart(el.getContext('2d'), {
+    type, data:{labels, datasets:[{data:values, backgroundColor:colors, borderWidth:0, borderRadius:type==='bar'?6:0}]},
+    options:{responsive:true, maintainAspectRatio:true, plugins:{legend:{display:type==='doughnut',position:'bottom',labels:{font:{size:11}}}}, scales:type==='bar'?{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}:{}}
+  });
+}
+
+function renderTrend(rows) {
+  const sessionCol = COL.session;
+  if (sessionCol === undefined) return;
+  const webinarMap = {};
+  rows.forEach(r => { const w = String(r[sessionCol]||'').trim(); if(w){if(!webinarMap[w])webinarMap[w]=[];webinarMap[w].push(r);} });
+  const wKeys = Object.keys(webinarMap).sort((a,b) => { const na=parseInt(a.replace(/[^0-9]/g,''))||0; const nb=parseInt(b.replace(/[^0-9]/g,''))||0; return na-nb; });
+
+  const satAvgs=[], counts=[];
+  const aiData={}, memberData={};
+  const pc = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+
+  wKeys.forEach((w,idx)=>{
+    const wRows=webinarMap[w];
+    counts.push(wRows.length);
+    if(HAS_SAT){const sv=wRows.map(r=>Number(r[COL.satisfaction])).filter(v=>!isNaN(v)&&v>0);satAvgs.push(sv.length?+(sv.reduce((a,b)=>a+b,0)/sv.length).toFixed(2):null);}
+    if(HAS_UND){wRows.forEach(r=>{const v=String(r[COL.understanding]||'').trim();if(!v)return;if(!aiData[v])aiData[v]=new Array(wKeys.length).fill(0);aiData[v][idx]++;});}
+    if(HAS_MEMBER){wRows.forEach(r=>{const m=String(r[COL.memberType]||'').trim();if(!m)return;if(!memberData[m])memberData[m]=new Array(wKeys.length).fill(0);memberData[m][idx]++;});}
+  });
+
+  const shortLabels = wKeys.map(w => { const match = w.match(/第\d+回/); return match ? match[0] : w.substring(0,8); });
+
+  // 満足度推移
+  if(HAS_SAT){
+    if(charts['chartTrendSat'])charts['chartTrendSat'].destroy();
+    const el=document.getElementById('chartTrendSat');
+    if(el)charts['chartTrendSat']=new Chart(el.getContext('2d'),{type:'line',data:{labels:shortLabels,datasets:[{label:'満足度平均',data:satAvgs,borderColor:pc,backgroundColor:pc+'30',fill:true,tension:.3,pointRadius:6,pointBackgroundColor:pc,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{min:1,max:5,ticks:{stepSize:1,font:{size:11}}},x:{ticks:{font:{size:11}}}}}});
+  }
+
+  // 理解度推移
+  if(HAS_UND){
+    const aiColors=['#2C82C9','#27AE60','#F39C12','#E74C3C','#9B59B6','#1ABC9C'];
+    const aiLevels=Object.keys(aiData).sort();
+    if(charts['chartTrendUnd'])charts['chartTrendUnd'].destroy();
+    const el=document.getElementById('chartTrendUnd');
+    if(el)charts['chartTrendUnd']=new Chart(el.getContext('2d'),{type:'bar',data:{labels:shortLabels,datasets:aiLevels.map((l,i)=>({label:l,data:aiData[l],backgroundColor:aiColors[i%aiColors.length],borderWidth:0,borderRadius:2}))},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{stacked:true,ticks:{font:{size:11}}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:11}}}}}});
+  }
+
+  // 提出数推移
+  if(charts['chartTrendCount'])charts['chartTrendCount'].destroy();
+  const elC=document.getElementById('chartTrendCount');
+  if(elC)charts['chartTrendCount']=new Chart(elC.getContext('2d'),{type:'bar',data:{labels:shortLabels,datasets:[{label:'提出数',data:counts,backgroundColor:'#27AE60',borderWidth:0,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}}});
+
+  // 区分別提出数
+  if(HAS_MEMBER){
+    const mColors=[pc,'#2C82C9','#27AE60','#F39C12','#9B59B6'];
+    const mTypes=Object.keys(memberData).sort();
+    if(charts['chartTrendMember'])charts['chartTrendMember'].destroy();
+    const el=document.getElementById('chartTrendMember');
+    if(el)charts['chartTrendMember']=new Chart(el.getContext('2d'),{type:'bar',data:{labels:shortLabels,datasets:mTypes.map((m,i)=>({label:m,data:memberData[m],backgroundColor:mColors[i%mColors.length],borderWidth:0,borderRadius:2}))},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{stacked:true,ticks:{font:{size:11}}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:11}}}}}});
+  }
+
+  // 詳細テーブル
+  const aiLevels = HAS_UND ? Object.keys(aiData).sort() : [];
+  let h='<tr><th>セッション</th><th>提出数</th>';
+  if(HAS_SAT)h+='<th>満足度平均</th>';
+  aiLevels.forEach(l=>h+='<th>'+escHtml(l)+'</th>');
+  h+='</tr>';
+  wKeys.forEach((w,idx)=>{
+    h+='<tr><td><strong>'+escHtml(shortLabels[idx])+'</strong></td><td>'+counts[idx]+'</td>';
+    if(HAS_SAT){const avg=satAvgs[idx]!==null?satAvgs[idx]:'-';const cls=avg!=='-'&&avg<=3?' class="low-score"':' class="highlight"';h+='<td'+cls+'>'+avg+'</td>';}
+    aiLevels.forEach(l=>h+='<td>'+(aiData[l][idx]||0)+'</td>');
+    h+='</tr>';
+  });
+  document.getElementById('trendDetailTable').innerHTML=h;
+}
+
+function renderCrossTab(rows) {
+  if (!HAS_MEMBER) return;
+  const container = document.getElementById('tab-cross');
+  let html = '';
+  const members = [...new Set(rows.map(r=>r[COL.memberType]).filter(Boolean))];
+
+  // 満足度 x 会員区分
+  if (HAS_SAT) {
+    const satScores = [...new Set(rows.map(r=>String(r[COL.satisfaction]||'')).filter(Boolean))].sort().reverse();
+    html += '<div class="section-title">満足度 x 会員区分</div><div style="overflow-x:auto"><table class="cross-table">';
+    html += '<tr><th>会員区分</th><th>回答数</th><th>平均</th>' + satScores.map(s=>'<th>'+s+'</th>').join('') + '</tr>';
+    members.forEach(m => {
+      const mr=rows.filter(r=>r[COL.memberType]===m);
+      const vals=mr.map(r=>Number(r[COL.satisfaction])).filter(v=>!isNaN(v)&&v>0);
+      const avg=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):'-';
+      const cls=Number(avg)<=3?' class="low-score"':' class="highlight"';
+      const dist={};satScores.forEach(s=>dist[s]=0);
+      mr.forEach(r=>{const v=String(r[COL.satisfaction]||'').trim();if(dist[v]!==undefined)dist[v]++});
+      html+='<tr><td><strong>'+escHtml(m)+'</strong></td><td>'+mr.length+'</td><td'+cls+'>'+avg+'</td>'+satScores.map(s=>{const n=Number(s);return n<=3&&dist[s]>0?'<td class="low-score">'+dist[s]+'</td>':'<td>'+dist[s]+'</td>';}).join('')+'</tr>';
+    });
+    html += '</table></div>';
+  }
+
+  // 理解度 x 会員区分
+  if (HAS_UND) {
+    const aiLevels = [...new Set(rows.map(r=>String(r[COL.understanding]||'')).filter(Boolean))].sort();
+    html += '<div class="section-title">理解度 x 会員区分</div><div style="overflow-x:auto"><table class="cross-table">';
+    html += '<tr><th>会員区分</th><th>回答数</th>' + aiLevels.map(l=>'<th>'+escHtml(l)+'</th>').join('') + '</tr>';
+    members.forEach(m => {
+      const mr=rows.filter(r=>r[COL.memberType]===m);
+      const dist={};aiLevels.forEach(l=>dist[l]=0);
+      mr.forEach(r=>{const v=String(r[COL.understanding]||'').trim();if(dist[v]!==undefined)dist[v]++});
+      html+='<tr><td><strong>'+escHtml(m)+'</strong></td><td>'+mr.length+'</td>'+aiLevels.map(l=>'<td>'+dist[l]+'</td>').join('')+'</tr>';
+    });
+    html += '</table></div>';
+  }
+
+  // アウトプット率 x 会員区分
+  if (HAS_OUTPUT) {
+    html += '<div class="section-title">アウトプット率 x 会員区分</div><div style="overflow-x:auto"><table class="cross-table">';
+    html += '<tr><th>会員区分</th><th>回答数</th><th>済</th><th>未</th><th>率</th></tr>';
+    members.forEach(m => {
+      const mr=rows.filter(r=>r[COL.memberType]===m);
+      const done=mr.filter(r=>{const v=String(r[COL.output]||'').trim();return v&&v!=='いいえ'&&v!=='できなかった'}).length;
+      const notDone=mr.length-done;
+      const rate=mr.length>0?Math.round(done/mr.length*100)+'%':'-';
+      const cls=mr.length>0&&done/mr.length<0.5?' class="low-score"':' class="highlight"';
+      html+='<tr><td><strong>'+escHtml(m)+'</strong></td><td>'+mr.length+'</td><td>'+done+'</td><td>'+(notDone>0?'<span class="low-score">'+notDone+'</span>':'0')+'</td><td'+cls+'>'+rate+'</td></tr>';
+    });
+    html += '</table></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function renderVoice(rows, total) {
+  // 既知の列
+  const knownCols = [
+    {key:'impression', title:'印象に残ったこと', icon:'favorite', checkNeg:true},
+    {key:'nextAction', title:'来週までにやること', icon:'checklist', checkNeg:false},
+    {key:'question', title:'質問', icon:'help', checkNeg:false},
+  ];
+  // 自由記述列
+  const freeCols = FREE_TEXT_COLS.map(f => ({
+    colIndex: f.colIndex, title: f.name, icon:'chat', checkNeg:true, isFree:true,
+  }));
+
+  const container = document.getElementById('tab-voice');
+  let filterHtml = '<div class="voice-filter">';
+  filterHtml += '<button class="'+(voiceFilter==='all'?'active-all':'')+'" onclick="setVoiceFilter(\'all\')"><span class="material-icons" style="font-size:14px;vertical-align:middle">list</span> すべて表示</button>';
+  filterHtml += '<button class="'+(voiceFilter==='negative'?'active':'')+'" onclick="setVoiceFilter(\'negative\')"><span class="material-icons" style="font-size:14px;vertical-align:middle">warning</span> ネガティブのみ</button>';
+  filterHtml += '</div>';
+  let voiceHtml = filterHtml;
+
+  const allDefs = [];
+  knownCols.forEach(d => {
+    if (COL[d.key] !== undefined) {
+      allDefs.push({col:COL[d.key], title:d.title, icon:d.icon, checkNeg:d.checkNeg, filterEmpty:d.key==='question'});
+    }
+  });
+  freeCols.forEach(d => {
+    allDefs.push({col:d.colIndex, title:d.title, icon:d.icon, checkNeg:d.checkNeg, filterEmpty:true});
+  });
+
+  allDefs.forEach(d => {
+    const responses = [];
+    rows.forEach(r => {
+      const v = String(r[d.col]||'').trim();
+      if (d.filterEmpty && !v) return;
+      const text = v || '（未回答）';
+      const neg = d.checkNeg && isNegative(v);
+      const member = HAS_MEMBER ? String(r[COL.memberType]||'').trim() : '';
+      responses.push({text, neg, member});
+    });
+
+    const filtered = voiceFilter==='negative' ? responses.filter(r=>r.neg) : responses;
+    const negCount = responses.filter(r=>r.neg).length;
+    const validCount = responses.filter(v=>v.text!=='（未回答）').length;
+    if (voiceFilter==='negative' && filtered.length===0) return;
+
+    const negBadge = negCount>0 ? ' <span style="background:#E74C3C;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;margin-left:4px">'+negCount+'件の注意</span>' : '';
+    voiceHtml += '<div class="freetext-section"><h3><span class="material-icons" style="font-size:18px;color:var(--primary)">'+d.icon+'</span> '+escHtml(d.title)+' <span class="count">('+validCount+' / '+total+'件)</span>'+negBadge+'</h3>';
+    voiceHtml += '<ul class="freetext-list">';
+    filtered.forEach((item,i) => {
+      const badge = HAS_MEMBER && item.member ? '<span class="member-badge">'+escHtml(item.member)+'</span>' : '';
+      voiceHtml += '<li class="'+(item.neg?'negative':'')+'"><span class="num">'+(i+1)+'</span>'+badge+escHtml(item.text)+'</li>';
+    });
+    voiceHtml += '</ul></div>';
+  });
+
+  container.innerHTML = voiceHtml;
+}
+
+function setVoiceFilter(mode) { voiceFilter=mode; const rows=getFiltered(); renderVoice(rows,rows.length); }
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+</script>
+</body>
+</html>

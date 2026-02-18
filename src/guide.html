@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>セットアップガイド</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP',sans-serif;background:#F5F9F9;color:#2D3436;line-height:1.9;-webkit-font-smoothing:antialiased}
+
+.hero{background:linear-gradient(135deg,#4A90D9,#357ABD);padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,.08);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;background:rgba(255,255,255,.06);border-radius:50%}
+.hero-badge{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:500;letter-spacing:.12em;padding:4px 16px;border-radius:20px;margin-bottom:16px;position:relative;z-index:1}
+.hero h1{color:#fff;font-size:24px;font-weight:900;position:relative;z-index:1;letter-spacing:.02em}
+.hero-sub{color:rgba(255,255,255,.85);font-size:13px;margin-top:8px;position:relative;z-index:1}
+
+.content{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+
+.overview{background:#fff;border-radius:16px;padding:28px;margin-bottom:32px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.overview h2{font-size:16px;font-weight:700;color:#4A90D9;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.overview p{font-size:14px;color:#555;margin-bottom:12px}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.feature-item{background:#F8FAFC;border-radius:10px;padding:16px;text-align:center}
+.feature-item .material-icons{font-size:28px;color:#4A90D9;margin-bottom:6px}
+.feature-item p{font-size:12px;color:#666;margin:0}
+.feature-item strong{display:block;font-size:13px;color:#2D3436;margin-bottom:4px}
+
+.step-section{margin-bottom:28px}
+.step-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.step-num{width:36px;height:36px;background:linear-gradient(135deg,#4A90D9,#357ABD);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0}
+.step-header h2{font-size:17px;font-weight:700;color:#2D3436}
+
+.card{background:#fff;border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.card h3{font-size:14px;font-weight:700;color:#555;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card h3 .material-icons{font-size:18px;color:#4A90D9}
+
+.steps-list{list-style:none;counter-reset:step}
+.steps-list li{position:relative;padding:10px 0 10px 36px;border-bottom:1px solid #f5f5f5;font-size:14px}
+.steps-list li:last-child{border-bottom:none}
+.steps-list li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:10px;width:24px;height:24px;background:#4A90D915;color:#4A90D9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+
+.highlight-box{background:linear-gradient(135deg,#EBF5FB,#D6EAF8);border:1px solid #AED6F1;border-radius:10px;padding:16px 20px;margin:12px 0;font-size:13px;color:#2471A3;line-height:1.7}
+.highlight-box strong{color:#1A5276}
+
+.warning-box{background:linear-gradient(135deg,#FFF8E1,#FFF3CD);border:1px solid #F9E79F;border-radius:10px;padding:16px 20px;margin:12px 0;font-size:13px;color:#7D6608;line-height:1.7;display:flex;gap:8px}
+.warning-box .material-icons{font-size:20px;color:#F39C12;flex-shrink:0;margin-top:2px}
+
+.success-box{background:linear-gradient(135deg,#E8F8F5,#D5F5E3);border:1px solid #A9DFBF;border-radius:10px;padding:16px 20px;margin:12px 0;font-size:13px;color:#1E8449;line-height:1.7;display:flex;gap:8px}
+.success-box .material-icons{font-size:20px;color:#27AE60;flex-shrink:0;margin-top:2px}
+
+.url-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.url-table th{background:#F0F4F8;padding:10px 14px;text-align:left;font-weight:500;border-bottom:2px solid #D5DBDB}
+.url-table td{padding:10px 14px;border-bottom:1px solid #f0f0f0}
+.url-table code{background:#EBF5FB;color:#2471A3;padding:2px 8px;border-radius:4px;font-size:12px;word-break:break-all}
+
+.keyword-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.keyword-table th{background:#F0F4F8;padding:8px 12px;text-align:left;font-weight:500;border-bottom:2px solid #D5DBDB;font-size:11px}
+.keyword-table td{padding:8px 12px;border-bottom:1px solid #f0f0f0}
+.keyword-table .tag{display:inline-block;background:#4A90D910;color:#4A90D9;padding:1px 8px;border-radius:4px;font-size:11px;margin:1px 2px}
+
+.footer{text-align:center;padding:20px;color:#aaa;font-size:12px}
+
+@media(max-width:600px){
+  .feature-grid{grid-template-columns:1fr}
+  .hero h1{font-size:20px}
+  .content{padding:20px 16px 40px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">SETUP GUIDE</div>
+  <h1>アンケートダッシュボード<br>セットアップガイド</h1>
+  <p class="hero-sub">スプシをコピーして、セットアップするだけ。</p>
+</div>
+
+<div class="content">
+
+  <!-- 概要 -->
+  <div class="overview">
+    <h2><span class="material-icons">info</span> このテンプレートでできること</h2>
+    <p>Googleフォームのアンケート結果を自動で集計・可視化します。フォーム送信のたびにリアルタイムで更新されます。</p>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="material-icons">analytics</span>
+        <strong>ダッシュボード</strong>
+        <p>満足度・理解度のグラフ、経過比較、クロス集計</p>
+      </div>
+      <div class="feature-item">
+        <span class="material-icons">question_answer</span>
+        <strong>Q&A質問回答集</strong>
+        <p>質問を自動収集、回答を記入してWebで公開</p>
+      </div>
+      <div class="feature-item">
+        <span class="material-icons">auto_fix_high</span>
+        <strong>自動検出</strong>
+        <p>フォームのヘッダーから列を自動マッピング</p>
+      </div>
+      <div class="feature-item">
+        <span class="material-icons">palette</span>
+        <strong>カラー選択</strong>
+        <p>ピンク/ブルー/グリーン/オレンジ/SHIFT AIの5色</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <h2>スプレッドシートをコピー</h2>
+    </div>
+    <div class="card">
+      <ol class="steps-list">
+        <li>このスプレッドシートの上部メニューから<br><strong>ファイル → コピーを作成</strong></li>
+        <li>好きな名前をつけて保存</li>
+        <li>コピー先のスプシを開く</li>
+      </ol>
+      <div class="highlight-box">
+        <strong>コピーするとGASのコードも一緒にコピーされます。</strong>追加のインストールは不要です。
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <h2>Googleフォームを紐付ける</h2>
+    </div>
+    <div class="card">
+      <ol class="steps-list">
+        <li>Googleフォームを作成（または既存のものを使用）</li>
+        <li>フォームの<strong>「回答」タブ → スプレッドシートにリンク</strong></li>
+        <li><strong>「既存のスプレッドシートを選択」</strong>で、コピーしたスプシを選ぶ</li>
+      </ol>
+      <div class="warning-box">
+        <span class="material-icons">lightbulb</span>
+        <div>フォームに<strong>「満足度」「質問」</strong>の項目があると、ダッシュボードとQ&A機能がフルに使えます。なくても動作します。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="material-icons">checklist</span> 自動検出される質問項目</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:8px">フォームの質問文にこれらのキーワードが含まれていれば自動認識します:</p>
+      <table class="keyword-table">
+        <tr><th>項目</th><th>キーワード</th></tr>
+        <tr><td>満足度</td><td><span class="tag">満足度</span><span class="tag">満足</span></td></tr>
+        <tr><td>理解度</td><td><span class="tag">理解度</span><span class="tag">理解</span></td></tr>
+        <tr><td>会員区分</td><td><span class="tag">会員</span><span class="tag">区分</span><span class="tag">所属</span></td></tr>
+        <tr><td>セッション名</td><td><span class="tag">ウェビナー</span><span class="tag">回</span><span class="tag">セッション</span><span class="tag">講座</span></td></tr>
+        <tr><td>感想</td><td><span class="tag">印象</span><span class="tag">感想</span><span class="tag">学び</span></td></tr>
+        <tr><td>質問</td><td><span class="tag">質問</span></td></tr>
+        <tr><td>アウトプット</td><td><span class="tag">アウトプット</span><span class="tag">実行</span></td></tr>
+      </table>
+      <p style="font-size:12px;color:#999;margin-top:8px">マッチしなかった項目も「受講者の声」タブに自動表示されます。</p>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <h2>初期セットアップを実行</h2>
+    </div>
+    <div class="card">
+      <ol class="steps-list">
+        <li>スプシのページを<strong>リロード</strong>（メニューの反映に必要）</li>
+        <li>上部メニューから<strong>「アンケート管理」→「初期セットアップ」</strong></li>
+        <li>初回は「承認が必要です」と表示される →<strong>「許可」をクリック</strong></li>
+        <li>フォーム回答シートが自動検出される → <strong>「はい」</strong></li>
+        <li>列のマッピング結果を確認 → <strong>「はい」</strong></li>
+        <li>プロジェクト名を入力（例: おうちAIラボ Season2）</li>
+        <li>テーマカラーを選択（1〜4の数字を入力）</li>
+      </ol>
+      <div class="success-box">
+        <span class="material-icons">check_circle</span>
+        <div>「セットアップ完了!」と表示されたら成功です。Q&Aシートも自動作成されています。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <h2>Webアプリをデプロイ</h2>
+    </div>
+    <div class="card">
+      <ol class="steps-list">
+        <li>スプシの<strong>拡張機能 → Apps Script</strong>を開く</li>
+        <li>右上の<strong>「デプロイ」→「新しいデプロイ」</strong></li>
+        <li>種類の歯車アイコン → <strong>「ウェブアプリ」</strong>を選択</li>
+        <li>実行ユーザー: <strong>「自分」</strong></li>
+        <li>アクセス: <strong>「全員」</strong>（または組織内）</li>
+        <li><strong>「デプロイ」</strong>をクリック</li>
+        <li>表示されたURLをコピー</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <h2>WEB_APP_URL を設定</h2>
+    </div>
+    <div class="card">
+      <ol class="steps-list">
+        <li>Apps Scriptエディタの左メニュー → <strong>プロジェクトの設定</strong>（歯車アイコン）</li>
+        <li>「スクリプトプロパティ」セクションの<strong>「スクリプトプロパティを追加」</strong></li>
+        <li>プロパティ: <code style="background:#EBF5FB;padding:2px 6px;border-radius:3px">WEB_APP_URL</code></li>
+        <li>値: Step 4でコピーした<strong>デプロイURL</strong>を貼り付け</li>
+        <li><strong>「スクリプトプロパティを保存」</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <h2>自動取り込みトリガーを設定</h2>
+    </div>
+    <div class="card">
+      <h3><span class="material-icons">bolt</span> フォーム送信時に質問を自動取り込み</h3>
+      <ol class="steps-list">
+        <li>Apps Scriptエディタの左メニュー → <strong>トリガー</strong>（時計アイコン）</li>
+        <li>右下の<strong>「+ トリガーを追加」</strong></li>
+        <li>関数: <strong>onFormSubmit</strong></li>
+        <li>イベントのソース: <strong>スプレッドシートから</strong></li>
+        <li>イベントの種類: <strong>フォーム送信時</strong></li>
+        <li><strong>「保存」</strong></li>
+      </ol>
+      <div class="highlight-box">
+        これで、フォーム回答が届くたびにQ&Aシートに質問が自動追加され、ダッシュボードもリアルタイムで更新されます。
+      </div>
+    </div>
+  </div>
+
+  <!-- 完了 -->
+  <div class="step-section">
+    <div class="step-header">
+      <div class="step-num" style="background:linear-gradient(135deg,#27AE60,#1E8449)">&#10003;</div>
+      <h2>セットアップ完了!</h2>
+    </div>
+    <div class="card">
+      <h3><span class="material-icons">link</span> アクセスURL</h3>
+      <table class="url-table">
+        <tr><th>ページ</th><th>URL</th><th>用途</th></tr>
+        <tr><td>Q&A質問回答集</td><td><code>デプロイURL</code></td><td>受講者に共有</td></tr>
+        <tr><td>ダッシュボード</td><td><code>デプロイURL?page=dashboard</code></td><td>管理者用</td></tr>
+        <tr><td>このガイド</td><td><code>デプロイURL?page=guide</code></td><td>操作説明</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3><span class="material-icons">tips_and_updates</span> 運用のポイント</h3>
+      <ul class="steps-list">
+        <li>Q&Aシートの<strong>「回答欄」</strong>に回答を記入すると、Q&Aページに自動表示されます（未記入の質問は非表示）</li>
+        <li>フォームの設問を変更した場合は、メニューの<strong>「セットアップをやり直す」</strong>で再検出できます</li>
+        <li>ダッシュボードはアクセスするたびに最新データを読み込みます（手動更新不要）</li>
+        <li>フォームを複数紐付けた場合も、すべて自動検出・統合されます</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  アンケートダッシュボード テンプレート | セットアップガイド
+</div>
+
+</body>
+</html>
