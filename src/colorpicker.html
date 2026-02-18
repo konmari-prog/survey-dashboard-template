@@ -90,11 +90,29 @@ h2{font-size:15px;font-weight:700;color:#2D3436;text-align:center;margin-bottom:
   </div>
 </div>
 
+<div id="done" style="display:none;text-align:center;padding:40px 20px;">
+  <div style="font-size:32px;margin-bottom:12px;">&#10003;</div>
+  <div style="font-size:15px;font-weight:700;color:#2D3436;margin-bottom:8px;">設定を保存しました</div>
+  <div style="font-size:12px;color:#888;">まもなく閉じます…</div>
+</div>
+
 <script>
 function pick(key) {
-  google.script.run.withSuccessHandler(function(){
-    google.script.host.close();
-  }).receiveColorChoice(key);
+  // カードを無効化して二重クリック防止
+  document.querySelectorAll('.card').forEach(function(c){ c.style.pointerEvents='none'; c.style.opacity='0.5'; });
+
+  google.script.run
+    .withSuccessHandler(function(){
+      document.querySelector('.grid').style.display = 'none';
+      document.querySelector('h2').style.display = 'none';
+      document.getElementById('done').style.display = 'block';
+      setTimeout(function(){ google.script.host.close(); }, 1500);
+    })
+    .withFailureHandler(function(err){
+      document.querySelectorAll('.card').forEach(function(c){ c.style.pointerEvents='auto'; c.style.opacity='1'; });
+      alert('エラー: ' + err.message);
+    })
+    .receiveColorChoice(key);
 }
 </script>
 </body>

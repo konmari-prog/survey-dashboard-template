@@ -147,6 +147,7 @@ function runSetup() {
     freeTextColumns: allFreeTextCols,
   };
   PropertiesService.getScriptProperties().setProperty('SETUP_PENDING_', JSON.stringify(pending));
+  Logger.log('SETUP_PENDING_ を保存しました: ' + JSON.stringify(pending).substring(0, 200));
 
   // --- Step 4: カラー選択ダイアログを表示 ---
   const html = HtmlService.createHtmlOutputFromFile('colorpicker')
@@ -157,15 +158,16 @@ function runSetup() {
 
 // === カラー選択の受け取り（colorpicker.html から呼ばれる） ===
 function receiveColorChoice(colorKey) {
-  const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // 一時保存データを取得
   const props = PropertiesService.getScriptProperties();
   const pendingJson = props.getProperty('SETUP_PENDING_');
+  Logger.log('SETUP_PENDING_ = ' + pendingJson);
   if (!pendingJson) {
-    showAlert_('セットアップデータが見つかりません。最初からやり直してください。');
-    return;
+    // 一時データがない場合、最低限のデフォルト設定で続行を試みる
+    Logger.log('SETUP_PENDING_ が見つかりません。runSetup() を先に実行してください。');
+    throw new Error('セットアップデータが見つかりません。メニューから「初期セットアップ」を再実行してください。');
   }
   const pending = JSON.parse(pendingJson);
   props.deleteProperty('SETUP_PENDING_'); // 一時データをクリーンアップ
@@ -201,22 +203,14 @@ function receiveColorChoice(colorKey) {
   saveConfig_(config);
 
   // --- Step 7: onFormSubmitトリガーを自動登録 ---
-  setupFormTrigger_();
+  // ※ HTMLダイアログ経由では ScriptApp の権限が制限されるため
+  //    トリガー登録はフラグを立てて、次回メニュー操作時に実行する
+  props.setProperty('TRIGGER_PENDING_', 'true');
+  Logger.log('トリガー登録を保留しました（次回メニュー操作時に実行）');
 
-  // --- 完了 → デプロイURL入力を促す ---
-  ui.alert(
-    'セットアップ完了!',
-    'プロジェクト名: ' + pending.projectName + '\n' +
-    'テーマカラー: ' + selectedColor.name + '\n' +
-    'フォームシート: ' + pending.sheets.length + '件\n' +
-    'Q&Aシート: 作成済み\n' +
-    'フォーム送信トリガー: 設定済み\n\n' +
-    '次に Webアプリの URL を設定します。',
-    ui.ButtonSet.OK
-  );
-
-  // デプロイURL入力
-  promptWebAppUrl_();
+  // 完了メッセージ（google.script.run 経由なので ui.alert は使えない）
+  // → colorpicker.html の successHandler でダイアログが閉じる
+  Logger.log('セットアップ設定保存完了: ' + pending.projectName + ' / ' + selectedColor.name);
 }
 
 // === onFormSubmitトリガーを自動登録（既存があれば二重登録しない） ===

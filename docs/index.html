@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>アンケートダッシュボード テンプレート配布ガイド | SHIFT AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#8c52ff",
+        "primary-light": "#a678ff",
+        "primary-pale": "#EDE5FF",
+        accent: "#ff5757",
+        "accent-light": "#ff7b7b",
+        "accent-pale": "#FFE8E8",
+        "bg-warm": "#FAFAF8",
+      },
+      fontFamily: {
+        display: ["Inter", "Noto Sans JP", "sans-serif"],
+        sans: ["Inter", "Noto Sans JP", "sans-serif"],
+      },
+    },
+  },
+};
+</script>
+<style>
+body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+.hero-gradient { background: linear-gradient(135deg, #ff5757, #8c52ff); }
+.step-number {
+  width: 2.5rem; height: 2.5rem;
+  background: linear-gradient(135deg, #ff5757, #8c52ff);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: bold; font-size: 1rem; flex-shrink: 0;
+}
+.cmd-box {
+  background: #1e1e1e; border-radius: 0.75rem; position: relative;
+}
+.cmd-box pre {
+  color: #e2e8f0; font-family: 'Fira Code', monospace;
+  font-size: 13px; line-height: 1.8; padding: 1.25rem; padding-right: 4rem;
+  margin: 0; white-space: pre-wrap; word-break: break-all;
+}
+.copy-btn { transition: all 0.2s; }
+.copy-btn:hover { transform: scale(1.05); }
+.copy-btn.copied { background: #10B981 !important; }
+.feature-icon {
+  width: 3rem; height: 3rem; border-radius: 0.75rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.keyword-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 9999px;
+  font-size: 12px; font-weight: 500; margin: 2px;
+}
+.faq-toggle { cursor: pointer; }
+.faq-toggle .faq-icon { transition: transform 0.2s; }
+.faq-toggle.open .faq-icon { transform: rotate(180deg); }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.faq-answer.open { max-height: 500px; }
+</style>
+</head>
+<body class="bg-bg-warm text-slate-800">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+  <div class="flex items-center space-x-2">
+    <span class="material-icons-outlined text-primary text-2xl">bar_chart</span>
+    <span class="font-bold text-lg tracking-tight">テンプレート配布ガイド</span>
+  </div>
+  <nav class="flex items-center space-x-4 text-sm font-medium">
+    <a class="hover:text-primary transition-colors hidden sm:block" href="#about">概要</a>
+    <a class="hover:text-primary transition-colors hidden sm:block" href="#setup">セットアップ</a>
+    <a class="hover:text-primary transition-colors hidden sm:block" href="#matching">自動検出</a>
+    <a class="hover:text-primary transition-colors" href="#faq">FAQ</a>
+  </nav>
+</div>
+</header>
+
+<!-- Hero -->
+<section class="hero-gradient text-white py-16 sm:py-20">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+  <p class="text-white/70 text-sm font-medium mb-3">SHIFT AI レクチャー配布資料</p>
+  <h1 class="text-3xl sm:text-4xl font-bold mb-4 leading-tight">アンケートダッシュボード<br>テンプレート</h1>
+  <p class="text-white/80 text-base mb-10">Googleフォーム × GAS だけで、リアルタイム集計ダッシュボード + Q&A質問回答集を構築</p>
+
+  <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2 max-w-3xl mx-auto">
+    <div class="bg-white/15 backdrop-blur rounded-xl p-4 flex items-center gap-3 w-full sm:w-auto sm:flex-1">
+      <span class="material-icons-outlined text-2xl flex-shrink-0">assignment</span>
+      <div class="text-left"><p class="font-bold text-sm">Google Form</p><p class="text-white/60 text-xs">何個でもOK</p></div>
+    </div>
+    <span class="material-icons-outlined text-xl text-white/50 rotate-90 sm:rotate-0">arrow_forward</span>
+    <div class="bg-white/15 backdrop-blur rounded-xl p-4 flex items-center gap-3 w-full sm:w-auto sm:flex-1">
+      <span class="material-icons-outlined text-2xl flex-shrink-0">table_chart</span>
+      <div class="text-left"><p class="font-bold text-sm">スプレッドシート</p><p class="text-white/60 text-xs">自動蓄積</p></div>
+    </div>
+    <span class="material-icons-outlined text-xl text-white/50 rotate-90 sm:rotate-0">arrow_forward</span>
+    <div class="bg-white/15 backdrop-blur rounded-xl p-4 flex items-center gap-3 w-full sm:w-auto sm:flex-1 ring-2 ring-white/40">
+      <span class="material-icons-outlined text-2xl flex-shrink-0">bar_chart</span>
+      <div class="text-left"><p class="font-bold text-sm">ダッシュボード</p><p class="text-white/60 text-xs">リアルタイム表示</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-14 sm:py-16">
+<div class="max-w-5xl mx-auto px-4 sm:px-6">
+  <h2 class="text-center text-2xl font-bold mb-3">このテンプレートでできること</h2>
+  <p class="text-center text-slate-500 text-sm mb-10">フォーム数に上限なし。ヘッダー名が違ってもキーワードで自動マッチング</p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+      <div class="feature-icon bg-primary-pale text-primary mb-4">
+        <span class="material-icons-outlined">insert_chart</span>
+      </div>
+      <h3 class="font-bold text-base mb-2">リアルタイムダッシュボード</h3>
+      <p class="text-sm text-slate-500">満足度・理解度・受講者の声をグラフで可視化。開くたびに最新データ</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+      <div class="feature-icon bg-accent-pale text-accent mb-4">
+        <span class="material-icons-outlined">question_answer</span>
+      </div>
+      <h3 class="font-bold text-base mb-2">Q&A質問回答集</h3>
+      <p class="text-sm text-slate-500">フォームの質問を自動取り込み。回答を入力して受講者に公開</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+      <div class="feature-icon bg-purple-50 text-primary mb-4">
+        <span class="material-icons-outlined">auto_fix_high</span>
+      </div>
+      <h3 class="font-bold text-base mb-2">ヘッダー自動検出</h3>
+      <p class="text-sm text-slate-500">「満足度」「全体の満足度」「満足」など表現が違ってもキーワードで自動マッチ</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+      <div class="feature-icon bg-green-50 text-green-600 mb-4">
+        <span class="material-icons-outlined">dynamic_form</span>
+      </div>
+      <h3 class="font-bold text-base mb-2">複数フォーム対応</h3>
+      <p class="text-sm text-slate-500">1つのスプレッドシートに複数フォームを紐付け可能。回ごとに別フォームでもOK</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+      <div class="feature-icon bg-amber-50 text-amber-600 mb-4">
+        <span class="material-icons-outlined">palette</span>
+      </div>
+      <h3 class="font-bold text-base mb-2">5色のテーマカラー</h3>
+      <p class="text-sm text-slate-500">ピンク・ブルー・グリーン・オレンジ・SHIFT AIカラーから選択</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+      <div class="feature-icon bg-sky-50 text-sky-600 mb-4">
+        <span class="material-icons-outlined">trending_up</span>
+      </div>
+      <h3 class="font-bold text-base mb-2">経過比較チャート</h3>
+      <p class="text-sm text-slate-500">セッションごとの満足度推移をグラフ化。改善傾向を一目で確認</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Setup Section -->
+<section id="setup" class="py-14 sm:py-16 bg-white">
+<div class="max-w-5xl mx-auto px-4 sm:px-6">
+  <h2 class="text-center text-2xl font-bold mb-3">セットアップ手順</h2>
+  <p class="text-center text-slate-500 text-sm mb-10">6ステップで完了。コーディング不要、コピペだけ</p>
+
+  <div class="max-w-3xl mx-auto space-y-6">
+
+    <!-- Step 1 -->
+    <div class="flex gap-4">
+      <div class="step-number">1</div>
+      <div class="flex-1">
+        <h3 class="font-bold text-base mb-2">スプレッドシートを新規作成</h3>
+        <p class="text-sm text-slate-600 mb-3"><a href="https://sheets.new" target="_blank" class="text-primary font-medium underline">sheets.new</a> にアクセスして新しいスプレッドシートを作成。名前を付ける（例：AI講座 アンケート集計）</p>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="flex gap-4">
+      <div class="step-number">2</div>
+      <div class="flex-1">
+        <h3 class="font-bold text-base mb-2">Googleフォームを紐付け</h3>
+        <p class="text-sm text-slate-600 mb-3">既存のGoogleフォーム（アンケート）を開いて：</p>
+        <div class="bg-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-1">
+          <p>フォーム > <strong>回答</strong>タブ > <strong>スプレッドシートにリンク</strong></p>
+          <p>「既存のスプレッドシートを選択」> Step 1 で作ったシートを指定</p>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">複数フォームがある場合は、全部同じスプレッドシートに紐付けてください</p>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="flex gap-4">
+      <div class="step-number">3</div>
+      <div class="flex-1">
+        <h3 class="font-bold text-base mb-2">Apps Script エディタを開いてスクリプトIDをコピー</h3>
+        <p class="text-sm text-slate-600 mb-3">スプレッドシートのメニューから：</p>
+        <div class="bg-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-1">
+          <p><strong>拡張機能</strong> > <strong>Apps Script</strong></p>
+          <p>左サイドバーの<strong>歯車アイコン（プロジェクトの設定）</strong> > <strong>スクリプトID</strong>をコピー</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="flex gap-4">
+      <div class="step-number">4</div>
+      <div class="flex-1">
+        <h3 class="font-bold text-base mb-2">テンプレートを push</h3>
+        <p class="text-sm text-slate-600 mb-3">ターミナル（コマンドライン）で以下を実行：</p>
+        <div class="cmd-box mb-2">
+          <pre id="cmd-clone">git clone https://github.com/konmari-prog/survey-dashboard-template.git
+cd survey-dashboard-template/src</pre>
+          <button class="copy-btn absolute top-3 right-3 bg-primary hover:bg-primary-light text-white text-xs px-3 py-1.5 rounded-lg" onclick="copyText('cmd-clone',this)">
+            <span class="material-icons-outlined text-sm align-middle mr-0.5">content_copy</span>コピー
+          </button>
+        </div>
+        <div class="cmd-box mb-2">
+          <pre id="cmd-clasp">cat > .clasp.json << EOF
+{
+  "scriptId": "ここにStep3のスクリプトIDを貼る",
+  "rootDir": "."
+}
+EOF
+
+clasp push --force</pre>
+          <button class="copy-btn absolute top-3 right-3 bg-primary hover:bg-primary-light text-white text-xs px-3 py-1.5 rounded-lg" onclick="copyText('cmd-clasp',this)">
+            <span class="material-icons-outlined text-sm align-middle mr-0.5">content_copy</span>コピー
+          </button>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 mt-3">
+          <p class="font-bold mb-1"><span class="material-icons-outlined text-sm align-middle mr-1">info</span>clasp が未インストールの場合</p>
+          <div class="cmd-box mt-2"><pre id="cmd-npm">npm install -g @google/clasp
+clasp login</pre>
+            <button class="copy-btn absolute top-3 right-3 bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded-lg" onclick="copyText('cmd-npm',this)">
+              <span class="material-icons-outlined text-sm align-middle mr-0.5">content_copy</span>コピー
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="flex gap-4">
+      <div class="step-number">5</div>
+      <div class="flex-1">
+        <h3 class="font-bold text-base mb-2">初期セットアップを実行</h3>
+        <p class="text-sm text-slate-600 mb-3">スプレッドシートをリロードして：</p>
+        <div class="bg-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-2">
+          <p><strong>アンケート管理</strong> > <strong>初期セットアップ</strong></p>
+          <p>フォーム回答シートが自動検出される（何個でもOK）</p>
+          <p>ヘッダーのキーワードから列を自動マッピング</p>
+          <p>プロジェクト名を入力 → テーマカラーを選択</p>
+          <p>Q&Aシートが自動作成される</p>
+        </div>
+        <p class="text-sm text-slate-600 mt-3">セットアップ後、メニューから <strong>「トリガーを設定」</strong> も忘れずに実行してね。フォーム送信時にQ&Aシートへ自動取り込みされるようになります</p>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="flex gap-4">
+      <div class="step-number">6</div>
+      <div class="flex-1">
+        <h3 class="font-bold text-base mb-2">WebAppをデプロイ</h3>
+        <p class="text-sm text-slate-600 mb-3">Apps Script エディタで：</p>
+        <div class="bg-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-1">
+          <p><strong>デプロイ</strong> > <strong>新しいデプロイ</strong></p>
+          <p>種類：<strong>ウェブアプリ</strong></p>
+          <p>実行ユーザー：<strong>自分</strong></p>
+          <p>アクセス：<strong>全員</strong>（URLを知っている人だけがアクセス）</p>
+        </div>
+        <p class="text-sm text-slate-600 mt-3">デプロイ後のURLをコピーして、メニュー <strong>「アンケート管理」>「WebアプリURL設定」</strong> に貼り付け</p>
+
+        <div class="mt-4 bg-primary-pale rounded-xl p-4">
+          <p class="text-sm font-bold text-primary mb-2">使えるURL</p>
+          <table class="text-sm w-full">
+            <tr><td class="text-slate-600 pr-3 py-1 whitespace-nowrap font-mono">デプロイURL</td><td class="text-slate-500">Q&A質問回答集（受講者向け）</td></tr>
+            <tr><td class="text-slate-600 pr-3 py-1 whitespace-nowrap font-mono">URL?page=dashboard</td><td class="text-slate-500">ダッシュボード（管理者向け）</td></tr>
+            <tr><td class="text-slate-600 pr-3 py-1 whitespace-nowrap font-mono">URL?page=guide</td><td class="text-slate-500">セットアップガイド</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<!-- Auto-detection Section -->
+<section id="matching" class="py-14 sm:py-16">
+<div class="max-w-5xl mx-auto px-4 sm:px-6">
+  <h2 class="text-center text-2xl font-bold mb-3">ヘッダー自動検出のしくみ</h2>
+  <p class="text-center text-slate-500 text-sm mb-10">フォームの質問名が違っても、キーワードが含まれていれば自動でマッチ</p>
+
+  <div class="max-w-3xl mx-auto">
+    <!-- Example -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-8">
+      <p class="font-bold text-sm text-slate-500 mb-4">例：3つのフォームで「満足度」の項目名が違う場合</p>
+      <div class="space-y-3">
+        <div class="flex items-center gap-3">
+          <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">フォーム1</span>
+          <span class="text-sm font-medium">「満足度」</span>
+          <span class="material-icons-outlined text-green-500 text-lg ml-auto">check_circle</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">フォーム2</span>
+          <span class="text-sm font-medium">「全体の<span class="text-accent font-bold">満足</span>度」</span>
+          <span class="material-icons-outlined text-green-500 text-lg ml-auto">check_circle</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">フォーム3</span>
+          <span class="text-sm font-medium">「<span class="text-accent font-bold">満足</span>」</span>
+          <span class="material-icons-outlined text-green-500 text-lg ml-auto">check_circle</span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-4">「満足」というキーワードが含まれていれば、すべて satisfaction 列としてマッピングされます</p>
+    </div>
+
+    <!-- Keyword Table -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-100">
+        <h3 class="font-bold text-base">検出キーワード一覧</h3>
+        <p class="text-xs text-slate-400 mt-1">フォームのヘッダーにこれらのキーワードが含まれていれば自動マッピング</p>
+      </div>
+      <div class="divide-y divide-slate-50">
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-slate-700 w-28 flex-shrink-0">タイムスタンプ</span>
+          <div><span class="keyword-tag bg-slate-100 text-slate-600">タイムスタンプ</span><span class="keyword-tag bg-slate-100 text-slate-600">timestamp</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-slate-700 w-28 flex-shrink-0">会員区分</span>
+          <div><span class="keyword-tag bg-purple-100 text-purple-700">会員</span><span class="keyword-tag bg-purple-100 text-purple-700">区分</span><span class="keyword-tag bg-purple-100 text-purple-700">所属</span><span class="keyword-tag bg-purple-100 text-purple-700">メンバー</span><span class="keyword-tag bg-purple-100 text-purple-700">属性</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-slate-700 w-28 flex-shrink-0">セッション</span>
+          <div><span class="keyword-tag bg-blue-100 text-blue-700">ウェビナー</span><span class="keyword-tag bg-blue-100 text-blue-700">回</span><span class="keyword-tag bg-blue-100 text-blue-700">セッション</span><span class="keyword-tag bg-blue-100 text-blue-700">講座</span><span class="keyword-tag bg-blue-100 text-blue-700">研修</span><span class="keyword-tag bg-blue-100 text-blue-700">開催</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-accent w-28 flex-shrink-0">満足度</span>
+          <div><span class="keyword-tag bg-red-100 text-red-700">満足度</span><span class="keyword-tag bg-red-100 text-red-700">満足</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-accent w-28 flex-shrink-0">理解度</span>
+          <div><span class="keyword-tag bg-red-100 text-red-700">理解度</span><span class="keyword-tag bg-red-100 text-red-700">理解</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-slate-700 w-28 flex-shrink-0">感想</span>
+          <div><span class="keyword-tag bg-amber-100 text-amber-700">印象</span><span class="keyword-tag bg-amber-100 text-amber-700">感想</span><span class="keyword-tag bg-amber-100 text-amber-700">学び</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-slate-700 w-28 flex-shrink-0">アクション</span>
+          <div><span class="keyword-tag bg-green-100 text-green-700">やること</span><span class="keyword-tag bg-green-100 text-green-700">アクション</span><span class="keyword-tag bg-green-100 text-green-700">実践</span><span class="keyword-tag bg-green-100 text-green-700">行動</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-slate-700 w-28 flex-shrink-0">アウトプット</span>
+          <div><span class="keyword-tag bg-teal-100 text-teal-700">アウトプット</span><span class="keyword-tag bg-teal-100 text-teal-700">実行</span><span class="keyword-tag bg-teal-100 text-teal-700">成果物</span></div>
+        </div>
+        <div class="flex items-start gap-4 p-4 px-5">
+          <span class="text-sm font-bold text-primary w-28 flex-shrink-0">質問</span>
+          <div><span class="keyword-tag bg-purple-100 text-purple-700">質問</span><span class="keyword-tag bg-purple-100 text-purple-700">question</span><span class="keyword-tag bg-purple-100 text-purple-700">Q&A</span></div>
+        </div>
+      </div>
+      <div class="p-5 bg-slate-50 text-xs text-slate-500">
+        キーワードにマッチしなかった列は「受講者の声」タブに自由記述として自動表示されます
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- How it works -->
+<section class="py-14 sm:py-16 bg-white">
+<div class="max-w-5xl mx-auto px-4 sm:px-6">
+  <h2 class="text-center text-2xl font-bold mb-3">データの流れ</h2>
+  <p class="text-center text-slate-500 text-sm mb-10">集計処理はゼロ。ダッシュボードを開いた瞬間にスプレッドシートを読みに行く</p>
+
+  <div class="max-w-3xl mx-auto">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-slate-50 rounded-2xl p-5 text-center">
+        <span class="material-icons-outlined text-3xl text-primary mb-3">send</span>
+        <p class="font-bold text-sm mb-1">フォーム送信</p>
+        <p class="text-xs text-slate-500">受講者がフォームに回答。スプレッドシートに自動蓄積</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-5 text-center">
+        <span class="material-icons-outlined text-3xl text-accent mb-3">open_in_browser</span>
+        <p class="font-bold text-sm mb-1">ダッシュボードを開く</p>
+        <p class="text-xs text-slate-500">URLにアクセスするとGASがスプレッドシートの全データを読み取り</p>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-5 text-center">
+        <span class="material-icons-outlined text-3xl text-green-600 mb-3">insights</span>
+        <p class="font-bold text-sm mb-1">グラフ表示</p>
+        <p class="text-xs text-slate-500">Chart.jsでリアルタイム描画。毎回最新データ</p>
+      </div>
+    </div>
+    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+      <span class="material-icons-outlined text-sm align-middle mr-1">lightbulb</span>
+      <strong>ポイント：</strong>事前の集計処理は一切不要。ダッシュボードを開くたびにスプレッドシートから直接データを取得して表示するしくみです
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq" class="py-14 sm:py-16">
+<div class="max-w-5xl mx-auto px-4 sm:px-6">
+  <h2 class="text-center text-2xl font-bold mb-3">よくある質問</h2>
+  <p class="text-center text-slate-500 text-sm mb-10">セットアップ中に困ったら</p>
+
+  <div class="max-w-3xl mx-auto space-y-3">
+
+    <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div class="faq-toggle flex items-center gap-3 p-5" onclick="toggleFaq(this)">
+        <span class="text-sm font-bold flex-1">フォームは何個まで紐付けられますか？</span>
+        <span class="material-icons-outlined faq-icon text-slate-400">expand_more</span>
+      </div>
+      <div class="faq-answer px-5 pb-5">
+        <p class="text-sm text-slate-600">上限はありません。1つのスプレッドシートに何個でもフォームを紐付けできます。セットアップ時に「タイムスタンプ」列があるシートをすべて自動検出します。</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div class="faq-toggle flex items-center gap-3 p-5" onclick="toggleFaq(this)">
+        <span class="text-sm font-bold flex-1">既存のフォーム（すでに回答があるもの）でも使えますか？</span>
+        <span class="material-icons-outlined faq-icon text-slate-400">expand_more</span>
+      </div>
+      <div class="faq-answer px-5 pb-5">
+        <p class="text-sm text-slate-600">はい、そのまま使えます。スプレッドシートに紐付ければ、過去の回答データもダッシュボードに反映されます。</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div class="faq-toggle flex items-center gap-3 p-5" onclick="toggleFaq(this)">
+        <span class="text-sm font-bold flex-1">ヘッダーにキーワードが入っていない列はどうなりますか？</span>
+        <span class="material-icons-outlined faq-icon text-slate-400">expand_more</span>
+      </div>
+      <div class="faq-answer px-5 pb-5">
+        <p class="text-sm text-slate-600">「自由記述」としてダッシュボードの「受講者の声」タブに自動表示されます。無駄になるデータはありません。</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div class="faq-toggle flex items-center gap-3 p-5" onclick="toggleFaq(this)">
+        <span class="text-sm font-bold flex-1">Q&Aシートに質問が自動で入らないのですが？</span>
+        <span class="material-icons-outlined faq-icon text-slate-400">expand_more</span>
+      </div>
+      <div class="faq-answer px-5 pb-5">
+        <p class="text-sm text-slate-600">メニュー「アンケート管理」>「トリガーを設定」を実行してください。これでフォーム送信時に質問が自動取り込みされます。また、既存の回答を取り込むには「フォーム回答を取り込む」を使ってください。</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div class="faq-toggle flex items-center gap-3 p-5" onclick="toggleFaq(this)">
+        <span class="text-sm font-bold flex-1">テーマカラーは後から変更できますか？</span>
+        <span class="material-icons-outlined faq-icon text-slate-400">expand_more</span>
+      </div>
+      <div class="faq-answer px-5 pb-5">
+        <p class="text-sm text-slate-600">メニュー「アンケート管理」>「セットアップをやり直す」で再設定できます。Q&Aシートのデータは保持されます。</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<!-- GitHub Link -->
+<section class="py-14 sm:py-16 bg-white">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+  <h2 class="text-2xl font-bold mb-3">テンプレートを取得</h2>
+  <p class="text-slate-500 text-sm mb-8">GitHubからクローンしてすぐ使えます</p>
+  <a href="https://github.com/konmari-prog/survey-dashboard-template" target="_blank"
+     class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold px-8 py-4 rounded-2xl transition-colors text-base">
+    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    GitHubでテンプレートを見る
+  </a>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="py-8 text-center text-xs text-slate-400 border-t border-slate-200">
+  <p>アンケートダッシュボード テンプレート | SHIFT AI レクチャー配布資料</p>
+  <p class="mt-1">Created by <a href="https://x.com/konmari_tweet" target="_blank" class="text-primary hover:underline">@konmari_tweet</a></p>
+</footer>
+
+<script>
+function copyText(id, btn) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<span class="material-icons-outlined text-sm align-middle mr-0.5">check</span>コピー済み';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span class="material-icons-outlined text-sm align-middle mr-0.5">content_copy</span>コピー';
+    }, 2000);
+  });
+}
+
+function toggleFaq(el) {
+  el.classList.toggle('open');
+  const answer = el.nextElementSibling;
+  answer.classList.toggle('open');
+}
+</script>
+</body>
+</html>

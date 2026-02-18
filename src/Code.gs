@@ -12,6 +12,9 @@ function showAlert_(message) {
 
 // === メニュー追加 ===
 function onOpen() {
+  // カラー選択後に保留されたトリガー登録を実行
+  completePendingSetup_();
+
   const menu = SpreadsheetApp.getUi().createMenu('アンケート管理');
 
   if (!isSetupDone_()) {
@@ -29,12 +32,14 @@ function onOpen() {
     menu.addSeparator();
 
     // --- 設定 ---
+    menu.addItem('トリガーを設定', 'manualSetupTrigger');
     menu.addItem('WebアプリURL設定', 'promptWebAppUrl_');
     menu.addItem('セットアップをやり直す', 'resetSetup');
   }
 
   menu.addSeparator();
   menu.addItem('セットアップガイドを開く', 'openGuide');
+  menu.addItem('デモフォームを作成', 'createDemoForms');
 
   menu.addToUi();
 }
@@ -127,42 +132,111 @@ function syncFormResponses() {
   showAlert_('取り込み完了!\n\nQ&A質問: ' + qaCount + '件追加');
 }
 
+// === トリガー手動設定（メニューから実行） ===
+function manualSetupTrigger() {
+  setupFormTrigger_();
+  PropertiesService.getScriptProperties().deleteProperty('TRIGGER_PENDING_');
+  showAlert_('フォーム送信トリガーを設定しました!\n\nフォームから回答が送信されると、Q&Aシートに質問が自動で取り込まれます。');
+}
+
+// === セットアップ保留タスクの完了（onOpen時に実行） ===
+function completePendingSetup_() {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    if (props.getProperty('TRIGGER_PENDING_') !== 'true') return;
+
+    // トリガー登録
+    setupFormTrigger_();
+    props.deleteProperty('TRIGGER_PENDING_');
+    Logger.log('保留中のトリガー登録を完了しました');
+
+    // セットアップ完了メッセージ
+    const config = getConfig_();
+    if (config) {
+      const ui = SpreadsheetApp.getUi();
+      ui.alert(
+        'セットアップ完了!',
+        'プロジェクト名: ' + config.projectName + '\n' +
+        'テーマカラー: ' + (COLOR_PRESETS[config.colorKey] || {}).name + '\n' +
+        'フォームシート: ' + config.sheets.length + '件\n' +
+        'Q&Aシート: 作成済み\n' +
+        'フォーム送信トリガー: 設定済み\n\n' +
+        '次に Webアプリをデプロイして URL を設定してください。\n' +
+        'メニュー「アンケート管理」>「WebアプリURL設定」から入力できます。',
+        ui.ButtonSet.OK
+      );
+    }
+  } catch (e) {
+    Logger.log('completePendingSetup_ エラー: ' + e.message);
+  }
+}
+
 // === フォーム送信時の自動取り込み（トリガーで実行） ===
 function onFormSubmit(e) {
-  if (!e || !e.values) return; // メニューからの誤実行を防止
+  Logger.log('=== onFormSubmit 発火 ===');
+  if (!e || !e.values) {
+    Logger.log('イベントデータなし。終了');
+    return;
+  }
+
   const config = getConfig_();
-  if (!config) return;
+  if (!config) {
+    Logger.log('config が見つかりません。セットアップ未完了');
+    return;
+  }
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let qaSheet = ss.getSheetByName(config.qaSheet);
-  if (!qaSheet) return;
+  let qaSheet = ss.getSheetByName(config.qaSheet || 'Q&A');
+  if (!qaSheet) {
+    Logger.log('Q&Aシートが見つかりません');
+    return;
+  }
 
   const row = e.values;
+  Logger.log('受信データ: ' + JSON.stringify(row));
+  Logger.log('列数: ' + row.length);
+  Logger.log('config.sheets: ' + JSON.stringify(config.sheets));
 
   // どのフォームシートから来たか判定（列数でマッチ）
   let matchedSheet = null;
   for (const sheetConfig of config.sheets) {
-    if (row.length <= sheetConfig.columnCount + 1) { // +1 は余裕
+    Logger.log('シート比較: ' + sheetConfig.name + ' columnCount=' + sheetConfig.columnCount + ' vs row.length=' + row.length);
+    if (row.length <= sheetConfig.columnCount + 1) {
       matchedSheet = sheetConfig;
       break;
     }
   }
-  // マッチしない場合は最初のシート設定を使う
   if (!matchedSheet && config.sheets.length > 0) {
     matchedSheet = config.sheets[0];
+    Logger.log('列数マッチなし。デフォルトシート使用: ' + matchedSheet.name);
   }
-  if (!matchedSheet) return;
+  if (!matchedSheet) {
+    Logger.log('マッチするシート設定がありません。終了');
+    return;
+  }
+
+  Logger.log('マッチしたシート: ' + matchedSheet.name);
+  Logger.log('columns: ' + JSON.stringify(matchedSheet.columns));
 
   const questionCol = matchedSheet.columns.question;
   const sessionCol = matchedSheet.columns.session;
-  if (!questionCol) return;
+  Logger.log('questionCol=' + questionCol + ', sessionCol=' + sessionCol);
+
+  if (!questionCol) {
+    Logger.log('question列がマッピングされていません。終了');
+    return;
+  }
 
   const question = String(row[questionCol - 1] || '').trim();
   const session = sessionCol ? (row[sessionCol - 1] || '') : '';
+  Logger.log('質問: "' + question + '", セッション: "' + session + '"');
 
   if (question) {
     const qaData = qaSheet.getDataRange().getValues();
     const nextNo = qaData.length;
     qaSheet.appendRow([nextNo, session, '', question, '']);
+    Logger.log('Q&Aシートに追加: No.' + nextNo);
+  } else {
+    Logger.log('質問が空のためスキップ');
   }
 }
